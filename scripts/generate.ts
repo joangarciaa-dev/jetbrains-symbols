@@ -15,18 +15,18 @@ const iconDefinitions: Record<string, { iconPath: string }> =
   theme.iconDefinitions
 const fileExtensions: Record<string, string> = theme.fileExtensions
 const fileNames: Record<string, string> = theme.fileNames
+const folderNames: Record<string, string> = theme.folderNames ?? {}
 
 ensureDirSync(join(ICONS_DEST, 'files'))
 ensureDirSync(join(ICONS_DEST, 'folders'))
 
 const validIcons = new Set(Object.keys(iconDefinitions))
 
-const folderEntries = Object.keys(iconDefinitions)
-    .filter(name => name.startsWith("folder-"))
-    .map(name => {
-      const folderKey = name.replace("folder-", "") // "folder-android" → "android"
-      const field = toKtFieldName(name)             // "folder-android" → "folder_android"
-      return [folderKey, field] as [string, string]
+const folderEntries = Object.entries(folderNames)
+    .filter(([_, icon]) => validIcons.has(icon))
+    .map(([folderName, iconName]) => {
+      const field = toKtFieldName(iconName) // "folder-orange-code" → "folder_orange_code"
+      return [folderName.toLowerCase(), field] as [string, string]
     })
 
 const validFileExtensions = Object.fromEntries(
@@ -67,9 +67,14 @@ function normalizeSvgDimensions(dir: string): void {
     const filePath = join(dir, entry.name)
     const content = Deno.readTextFileSync(filePath)
 
-    const normalized = content
+    let normalized = content
       .replace(/\swidth="[^"]*"/i, ' width="16"')
       .replace(/\sheight="[^"]*"/i, ' height="16"')
+
+    // Add width/height if the root <svg> element has neither
+    if (!/ width="/.test(normalized)) {
+      normalized = normalized.replace(/<svg([^>]*)>/, '<svg$1 width="16" height="16">')
+    }
 
     if (normalized !== content) {
       Deno.writeTextFileSync(filePath, normalized)

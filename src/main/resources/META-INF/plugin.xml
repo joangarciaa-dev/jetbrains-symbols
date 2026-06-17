@@ -11,7 +11,7 @@
         <p>Minimal, clean icons for your project tree.</p>
     ]]></description>
   
-  <vendor url="https://github.com/sebastiandotdev">sebastiandotdev</vendor>
+  <vendor url="https://github.com/joansebgarcia">joansebgarcia</vendor>
   
   <depends>com.intellij.modules.platform</depends>
   <extensions defaultExtensionNs="com.intellij">
